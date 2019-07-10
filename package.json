@@ -5,13 +5,19 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode=development",
-    "start": "webpack-dev-server --mode=development"
+    "start": "webpack-dev-server --mode=development",
+    "lint": "tslint -p .",
+    "lintfix": "tslint --fix -p ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "prettier": "^1.18.2",
     "ts-loader": "^6.0.4",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.5.3",
     "webpack": "^4.35.3",
     "webpack-cli": "^3.3.5",
