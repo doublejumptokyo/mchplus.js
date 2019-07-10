@@ -1,4 +1,6 @@
-import { Item } from './item'
-var elem = document.getElementById('output')
-var aBook = new Item('はじめてのTypeScript', 2980)
-aBook.say(elem)
+import Web3 from 'web3'
+import MchSdk from './mch-sdk'
+
+const web3 = new Web3((window as any).web3.currentProvider)
+
+export default new MchSdk(web3)
