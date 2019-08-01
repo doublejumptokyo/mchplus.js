@@ -6251,7 +6251,7 @@ eval("module.exports = extend\n\nvar hasOwnProperty = Object.prototype.hasOwnPro
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\nvar __importDefault = (this && this.__importDefault) || function (mod) {\n    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n};\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar web3_1 = __importDefault(__webpack_require__(/*! web3 */ \"./node_modules/web3/dist/web3.umd.js\"));\nvar mch_sdk_1 = __importDefault(__webpack_require__(/*! ./mch-sdk */ \"./src/mch-sdk.ts\"));\nvar web3 = new web3_1.default(window.web3.currentProvider);\nexports.default = new mch_sdk_1.default(web3);\n\n\n//# sourceURL=webpack:///./src/app.ts?");
+eval("\nvar __importDefault = (this && this.__importDefault) || function (mod) {\n    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n};\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar web3_1 = __importDefault(__webpack_require__(/*! web3 */ \"./node_modules/web3/dist/web3.umd.js\"));\nvar mch_sdk_1 = __importDefault(__webpack_require__(/*! ./mch-sdk */ \"./src/mch-sdk.ts\"));\nvar web3 = new web3_1.default(window.web3.currentProvider);\nconsole.log(new mch_sdk_1.default(web3));\nexports.default = new mch_sdk_1.default(web3);\n\n\n//# sourceURL=webpack:///./src/app.ts?");
 
 /***/ }),
 
