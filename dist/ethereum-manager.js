@@ -1,16 +1,56 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const web3_1 = __importDefault(require("web3"));
 class EthereumManager {
     constructor(web3) {
-        this.browserWeb3 = web3;
+        this.web3 = web3;
+    }
+    get defaultAccount() {
+        return this.web3.defaultAccount;
+    }
+    get utils() {
+        return this.web3.utils;
+    }
+    get eth() {
+        return this.web3.eth;
+    }
+    async init() {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        if (window.ethereum) {
+            window.web3 = new web3_1.default(window.ethereum);
+            try {
+                await window.ethereum.enable();
+            }
+            catch (e) {
+                console.error(e);
+                return;
+            }
+        }
+        this.web3.defaultAccount = await this.getCurrentAccountAsync();
+        setInterval(async () => {
+            const account = await this.getCurrentAccountAsync();
+            if (account !== this.web3.defaultAccount) {
+                location.reload();
+            }
+        }, 1000);
     }
     async getCurrentAccountAsync() {
-        const account = await this.browserWeb3.eth.getAccounts();
-        return account[0];
+        try {
+            const account = await this.web3.eth.getAccounts();
+            return account[0];
+        }
+        catch (e) {
+            return '';
+        }
     }
     async getSignatureAsync(dataToSign) {
         const address = await this.getCurrentAccountAsync();
-        const sig = await this.browserWeb3.eth.personal.sign(dataToSign, address, '');
+        const sig = await this.web3.eth.personal.sign(dataToSign, address, '');
         return sig;
     }
 }
