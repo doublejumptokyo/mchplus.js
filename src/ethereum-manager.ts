@@ -9,7 +9,8 @@ export class EthereumManager {
 
   constructor() {
     if (typeof window === 'undefined') {
-      throw new Error('[Error] There is no Window object.')
+      this.web3 = new Web3()
+      return
     }
 
     const w: any = window
