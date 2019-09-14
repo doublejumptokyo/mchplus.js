@@ -2,7 +2,6 @@ import axios from 'axios'
 import humps from 'humps'
 import EthereumManager from './ethereum-manager'
 import abi from './abi.json'
-import Web3 from 'web3'
 
 const DOMAIN = 'https://beta-api.mch.plus'
 
@@ -12,19 +11,10 @@ export class Mchplus {
   private ethereumManager: EthereumManager
 
   constructor(netId = 1) {
-    let web3: Web3
-    if (typeof window !== 'undefined') {
-      web3 = (window as any).web3
-        ? new Web3((window as any).web3.currentProvider)
-        : new Web3()
-    } else {
-      web3 = new Web3()
-    }
-
     const networkName = this.getNetworkName(netId)
     this.metadataBaseUrl = `${DOMAIN}/metadata/ethereum/${networkName}`
     this.accountBaseUrl = `${DOMAIN}/account/ethereum/${networkName}`
-    this.ethereumManager = new EthereumManager(web3)
+    this.ethereumManager = new EthereumManager()
   }
 
   get account(): string {
@@ -32,11 +22,7 @@ export class Mchplus {
   }
 
   get hasWallet(): boolean {
-    if (typeof window === 'undefined') {
-      return false
-    }
-    const w: any = window
-    return typeof w.ethereum !== 'undefined' || typeof w.web3 !== 'undefined'
+    return this.ethereumManager.hasWallet
   }
 
   getIsHead(address: string): boolean {

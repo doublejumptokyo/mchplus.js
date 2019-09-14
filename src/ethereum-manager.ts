@@ -7,8 +7,21 @@ interface ExtendedWeb3 extends Web3 {
 export class EthereumManager {
   private web3: ExtendedWeb3
 
-  constructor(web3: Web3) {
-    this.web3 = web3
+  constructor() {
+    if (typeof window === 'undefined') {
+      throw new Error('[Error] There is no Window object.')
+    }
+
+    const w: any = window
+    if (w.ethereum) {
+      this.web3 = new Web3(w.ethereum)
+      this.web3.defaultAccount = w.ethereum.selectedAddress
+    } else if (w.web3) {
+      this.web3 = new Web3(w.web3.currentProvider)
+      this.web3.defaultAccount = w.web3.currentProvider.selectedAddress
+    } else {
+      this.web3 = new Web3()
+    }
   }
 
   get defaultAccount() {
@@ -23,14 +36,21 @@ export class EthereumManager {
     return this.web3.eth
   }
 
-  async init() {
+  get hasWallet() {
     if (typeof window === 'undefined') {
-      return
+      return false
+    }
+    const w: any = window
+    return typeof w.ethereum !== 'undefined' || typeof w.web3 !== 'undefined'
+  }
+
+  async init() {
+    if (!this.hasWallet) {
+      throw new Error('[Error] There is no Ethereum wallet.')
     }
 
     const w: any = window
     if (w.ethereum) {
-      w.web3 = new Web3(w.ethereum)
       try {
         await w.ethereum.enable()
       } catch (e) {
