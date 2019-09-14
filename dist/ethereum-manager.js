@@ -21,10 +21,11 @@ class EthereumManager {
         if (typeof window === 'undefined') {
             return;
         }
-        if (window.ethereum) {
-            window.web3 = new web3_1.default(window.ethereum);
+        const w = window;
+        if (w.ethereum) {
+            w.web3 = new web3_1.default(w.ethereum);
             try {
-                await window.ethereum.enable();
+                await w.ethereum.enable();
             }
             catch (e) {
                 console.error(e);

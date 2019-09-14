@@ -28,10 +28,11 @@ export default class EthereumManager {
       return
     }
 
-    if ((<any>window).ethereum) {
-      (<any>window).web3 = new Web3((<any>window).ethereum)
+    const w: any = window
+    if (w.ethereum) {
+      w.web3 = new Web3(w.ethereum)
       try {
-        await (<any>window).ethereum.enable()
+        await w.ethereum.enable()
       } catch (e) {
         console.error(e)
         return

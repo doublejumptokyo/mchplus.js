@@ -4,14 +4,29 @@ import EthereumManager from './ethereum-manager'
 import abi from './abi.json'
 import Web3 from 'web3'
 
-export default class MchSdk {
+const DOMAIN = 'https://beta-api.mch.plus'
+
+export default class Mchplus {
   private metadataBaseUrl: string
   private accountBaseUrl: string
   private ethereumManager: EthereumManager
 
-  constructor(web3: Web3) {
-    this.metadataBaseUrl = 'https://beta-api.mch.plus/metadata/ethereum/mainnet'
-    this.accountBaseUrl = 'https://beta-api.mch.plus/account/ethereum/mainnet'
+  constructor(netId = 1) {
+    let web3: Web3
+    if (typeof window !== 'undefined') {
+      web3 = (window as any).web3
+        ? new Web3((window as any).web3.currentProvider)
+        : new Web3()
+    } else {
+      web3 = new Web3()
+    }
+
+    this.metadataBaseUrl = `${DOMAIN}/metadata/ethereum/${this.getNetworkName(
+      netId
+    )}`
+    this.accountBaseUrl = `${DOMAIN}/account/ethereum/${this.getNetworkName(
+      netId
+    )}`
     this.ethereumManager = new EthereumManager(web3)
   }
 
@@ -33,6 +48,19 @@ export default class MchSdk {
 
   getContract(address: string) {
     return new this.ethereumManager.eth.Contract(abi, address)
+  }
+
+  getNetworkName(netId: number = 1) {
+    switch (netId) {
+      case 1:
+        return 'mainnet'
+      case 3:
+        return 'ropsten'
+      case 4:
+        return 'rinkeby'
+      default:
+        return 'mainnet'
+    }
   }
 
   async init() {
@@ -61,7 +89,9 @@ export default class MchSdk {
   }
 
   async sendAsset(contract, id: string, to: string) {
-    return await contract.methods.safeTransferFrom(this.account, to, id).send({ from: this.account })
+    return await contract.methods
+      .safeTransferFrom(this.account, to, id)
+      .send({ from: this.account })
   }
 
   async get(address: string): Promise<Object> {
@@ -78,7 +108,8 @@ export default class MchSdk {
   }
 
   async post(address: string, data = {}) {
-    const metadata = window.btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+    const encoded = encodeURIComponent(JSON.stringify(data))
+    const metadata = window.btoa(unescape(encoded))
     const iss = await this.ethereumManager.getCurrentAccountAsync()
     const sig = await this.ethereumManager.getSignatureAsync(metadata)
     const postData = humps.decamelizeKeys({ iss, sig, metadata })
