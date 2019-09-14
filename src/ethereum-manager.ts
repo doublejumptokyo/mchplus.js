@@ -4,7 +4,7 @@ interface ExtendedWeb3 extends Web3 {
   defaultAccount?: string
 }
 
-export default class EthereumManager {
+export class EthereumManager {
   private web3: ExtendedWeb3
 
   constructor(web3: Web3) {
@@ -68,3 +68,5 @@ export default class EthereumManager {
     return sig
   }
 }
+
+export default EthereumManager
