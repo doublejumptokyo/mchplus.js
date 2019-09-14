@@ -32,7 +32,11 @@ export class Mchplus {
   }
 
   get hasWallet(): boolean {
-    return !!this.account
+    if (typeof window === 'undefined') {
+      return false
+    }
+    const w: any = window
+    return typeof w.ethereum !== 'undefined' || typeof w.web3 !== 'undefined'
   }
 
   getIsHead(address: string): boolean {
