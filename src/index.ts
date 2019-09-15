@@ -6,15 +6,22 @@ import abi from './abi.json'
 const DOMAIN = 'https://beta-api.mch.plus'
 
 export class Mchplus {
-  private metadataBaseUrl: string
-  private accountBaseUrl: string
+  private netId: number
   private ethereumManager: EthereumManager
 
   constructor(netId = 1) {
-    const networkName = this.getNetworkName(netId)
-    this.metadataBaseUrl = `${DOMAIN}/metadata/ethereum/${networkName}`
-    this.accountBaseUrl = `${DOMAIN}/account/ethereum/${networkName}`
+    this.netId = netId
     this.ethereumManager = new EthereumManager()
+  }
+
+  get metadataBaseUrl(): string {
+    const networkName = this.getNetworkName(this.netId)
+    return `${DOMAIN}/metadata/ethereum/${networkName}`
+  }
+
+  get accountBaseUrl(): string {
+    const networkName = this.getNetworkName(this.netId)
+    return `${DOMAIN}/account/ethereum/${networkName}`
   }
 
   get account(): string {
@@ -48,6 +55,10 @@ export class Mchplus {
       default:
         return 'mainnet'
     }
+  }
+
+  setNetId(netId: number): void {
+    this.netId = netId
   }
 
   async init() {
