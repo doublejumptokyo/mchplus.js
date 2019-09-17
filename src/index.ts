@@ -6,22 +6,10 @@ import abi from './abi.json'
 const DOMAIN = 'https://beta-api.mch.plus'
 
 export class Mchplus {
-  private netId: number
   private ethereumManager: EthereumManager
 
-  constructor(netId = 1) {
-    this.netId = netId
+  constructor() {
     this.ethereumManager = new EthereumManager()
-  }
-
-  get metadataBaseUrl(): string {
-    const networkName = this.getNetworkName(this.netId)
-    return `${DOMAIN}/metadata/ethereum/${networkName}`
-  }
-
-  get accountBaseUrl(): string {
-    const networkName = this.getNetworkName(this.netId)
-    return `${DOMAIN}/account/ethereum/${networkName}`
   }
 
   get account(): string {
@@ -30,6 +18,16 @@ export class Mchplus {
 
   get hasWallet(): boolean {
     return this.ethereumManager.hasWallet
+  }
+
+  getMetadataBaseUrl(netId: number = 1): string {
+    const networkName = this.getNetworkName(netId)
+    return `${DOMAIN}/metadata/ethereum/${networkName}`
+  }
+
+  getAccountBaseUrl(netId: number = 1): string {
+    const networkName = this.getNetworkName(netId)
+    return `${DOMAIN}/account/ethereum/${networkName}`
   }
 
   getIsHead(address: string): boolean {
@@ -57,20 +55,16 @@ export class Mchplus {
     }
   }
 
-  setNetId(netId: number): void {
-    this.netId = netId
-  }
-
   async init() {
     await this.ethereumManager.init()
   }
 
-  async getAccount(address: string) {
+  async getAccount(address: string, netId: number = 1) {
     try {
       if (!address) {
         throw 'There is no Address.'
       }
-      const url = `${this.accountBaseUrl}/${address}`
+      const url = `${this.getAccountBaseUrl(netId)}/${address}`
       const res = await axios.get(url)
       return humps.camelizeKeys(res.data)
     } catch (e) {
@@ -92,12 +86,12 @@ export class Mchplus {
       .send({ from: this.account })
   }
 
-  async get(address: string): Promise<Object> {
+  async get(address: string, netId: number = 1): Promise<Object> {
     try {
       if (!address) {
         return {}
       }
-      const url = `${this.metadataBaseUrl}/${address}`
+      const url = `${this.getMetadataBaseUrl(netId)}/${address}`
       const res = await axios.get(url)
       return humps.camelizeKeys(res.data)
     } catch (e) {
@@ -105,13 +99,13 @@ export class Mchplus {
     }
   }
 
-  async post(address: string, data = {}) {
+  async post(address: string, data = {}, netId: number = 1) {
     const encoded = encodeURIComponent(JSON.stringify(data))
     const metadata = window.btoa(unescape(encoded))
     const iss = await this.ethereumManager.getCurrentAccountAsync()
     const sig = await this.ethereumManager.getSignatureAsync(metadata)
     const postData = humps.decamelizeKeys({ iss, sig, metadata })
-    const url = `${this.metadataBaseUrl}/${address}`
+    const url = `${this.getMetadataBaseUrl(netId)}/${address}`
     const res = await axios.post(url, postData, {
       headers: { 'Content-Type': 'application/json' }
     })

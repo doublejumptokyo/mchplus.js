@@ -1,11 +1,7 @@
 import Web3 from 'web3'
 
-interface ExtendedWeb3 extends Web3 {
-  defaultAccount?: string
-}
-
 export class EthereumManager {
-  private web3: ExtendedWeb3
+  private web3: Web3
 
   constructor() {
     if (typeof window === 'undefined') {
@@ -16,17 +12,22 @@ export class EthereumManager {
     const w: any = window
     if (w.ethereum) {
       this.web3 = new Web3(w.ethereum)
-      this.web3.defaultAccount = w.ethereum.selectedAddress
     } else if (w.web3) {
       this.web3 = new Web3(w.web3.currentProvider)
-      this.web3.defaultAccount = w.web3.currentProvider.selectedAddress
     } else {
       this.web3 = new Web3()
     }
   }
 
   get defaultAccount() {
-    return this.web3.defaultAccount
+    const w: any = window
+    if (w.ethereum) {
+      return w.ethereum.selectedAddress
+    } else if (w.web3) {
+      return w.web3.currentProvider.selectedAddress
+    } else {
+      throw new Error('[Error] There is no Ethereum wallet.')
+    }
   }
 
   get utils() {
@@ -60,11 +61,9 @@ export class EthereumManager {
       }
     }
 
-    this.web3.defaultAccount = await this.getCurrentAccountAsync()
-
     setInterval(async () => {
       const account = await this.getCurrentAccountAsync()
-      if (account !== this.web3.defaultAccount) {
+      if (account !== this.defaultAccount) {
         location.reload()
       }
     }, 1000)
@@ -73,7 +72,7 @@ export class EthereumManager {
   async getCurrentAccountAsync(): Promise<string> {
     try {
       const account = await this.web3.eth.getAccounts()
-      return account[0]
+      return account[0].toLowerCase()
     } catch (e) {
       return ''
     }
