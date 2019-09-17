@@ -20,6 +20,10 @@ export class EthereumManager {
   }
 
   get defaultAccount() {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
     const w: any = window
     if (w.ethereum) {
       return w.ethereum.selectedAddress
