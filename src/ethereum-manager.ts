@@ -17,6 +17,7 @@ export class EthereumManager {
     if (w.ethereum) {
       this.options.dev &&
         console.info('[mchplus.js] Initialize with `window.ethereum` .')
+      w.ethereum.autoRefreshOnNetworkChange = false
       this.web3 = new Web3(w.ethereum)
     } else if (w.web3) {
       this.options.dev &&
@@ -67,7 +68,6 @@ export class EthereumManager {
     if (w.ethereum) {
       try {
         await w.ethereum.enable()
-        w.ethereum.autoRefreshOnNetworkChange = false
         w.ethereum.on('accountsChanged', () => {
           this.options.dev && console.info('[mchplus.js] Account Changed.')
           w.location.reload()
