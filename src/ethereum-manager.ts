@@ -59,18 +59,21 @@ export class EthereumManager {
     if (w.ethereum) {
       try {
         await w.ethereum.enable()
+        w.ethereum.autoRefreshOnNetworkChange = false
+        w.ethereum.on('accountsChanged', () => w.location.reload())
+        w.ethereum.on('networkChanged', () => w.location.reload())
       } catch (e) {
         console.error(e)
         return
       }
+    } else {
+      w.setInterval(async () => {
+        const account = await this.getCurrentAccountAsync()
+        if (account !== this.defaultAccount) {
+          w.location.reload()
+        }
+      }, 100)
     }
-
-    setInterval(async () => {
-      const account = await this.getCurrentAccountAsync()
-      if (account !== this.defaultAccount) {
-        location.reload()
-      }
-    }, 1000)
   }
 
   async getCurrentAccountAsync(): Promise<string> {
