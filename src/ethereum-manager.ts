@@ -1,9 +1,13 @@
 import Web3 from 'web3'
 
+export interface Options {
+  dev: boolean
+}
+
 export class EthereumManager {
   private web3: Web3
 
-  constructor() {
+  constructor(private options: Options = { dev: false }) {
     if (typeof window === 'undefined') {
       this.web3 = new Web3()
       return
@@ -11,8 +15,12 @@ export class EthereumManager {
 
     const w: any = window
     if (w.ethereum) {
+      this.options.dev &&
+        console.info('[mchplus.js] Initialize with `window.ethereum` .')
       this.web3 = new Web3(w.ethereum)
     } else if (w.web3) {
+      this.options.dev &&
+        console.info('[mchplus.js] Initialize with `window.web3` .')
       this.web3 = new Web3(w.web3.currentProvider)
     } else {
       this.web3 = new Web3()
@@ -60,8 +68,14 @@ export class EthereumManager {
       try {
         await w.ethereum.enable()
         w.ethereum.autoRefreshOnNetworkChange = false
-        w.ethereum.on('accountsChanged', () => w.location.reload())
-        w.ethereum.on('networkChanged', () => w.location.reload())
+        w.ethereum.on('accountsChanged', () => {
+          this.options.dev && console.info('[mchplus.js] Account Changed.')
+          w.location.reload()
+        })
+        w.ethereum.on('networkChanged', () => {
+          this.options.dev && console.info('[mchplus.js] Network Changed.')
+          w.location.reload()
+        })
       } catch (e) {
         console.error(e)
         return
@@ -70,16 +84,22 @@ export class EthereumManager {
       w.setInterval(async () => {
         const account = await this.getCurrentAccountAsync()
         if (account !== this.defaultAccount) {
+          this.options.dev && console.info('[mchplus.js] Account Changed.')
           w.location.reload()
         }
       }, 100)
     }
+
+    this.options.dev && console.info('[mchplus.js] Unlocked.')
   }
 
   async getCurrentAccountAsync(): Promise<string> {
     try {
-      const account = await this.web3.eth.getAccounts()
-      return account[0].toLowerCase()
+      const accounts = await this.web3.eth.getAccounts()
+      const account = accounts[0].toLowerCase()
+      this.options.dev &&
+        console.info(`[mchplus.js] Current account is ${account}.`)
+      return account
     } catch (e) {
       return ''
     }

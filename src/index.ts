@@ -1,6 +1,6 @@
 import axios from 'axios'
 import humps from 'humps'
-import EthereumManager from './ethereum-manager'
+import { EthereumManager, Options } from './ethereum-manager'
 import abi from './abi.json'
 
 const DOMAIN = 'https://beta-api.mch.plus'
@@ -8,8 +8,8 @@ const DOMAIN = 'https://beta-api.mch.plus'
 export class Mchplus {
   private ethereumManager: EthereumManager
 
-  constructor() {
-    this.ethereumManager = new EthereumManager()
+  constructor(options: Options = { dev: false }) {
+    this.ethereumManager = new EthereumManager(options)
   }
 
   get account(): string {
