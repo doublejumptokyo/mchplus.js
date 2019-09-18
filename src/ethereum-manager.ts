@@ -30,7 +30,7 @@ export class EthereumManager {
     } else if (w.web3) {
       return w.web3.currentProvider.selectedAddress
     } else {
-      throw new Error('[Error] There is no Ethereum wallet.')
+      return ''
     }
   }
 
