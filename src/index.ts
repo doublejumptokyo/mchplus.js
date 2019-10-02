@@ -8,8 +8,8 @@ const DOMAIN = 'https://beta-api.mch.plus'
 export class Mchplus {
   private ethereumManager: EthereumManager
 
-  constructor(options: Options = { dev: false }) {
-    this.ethereumManager = new EthereumManager(options)
+  constructor(provider = null, options: Options = { dev: false }) {
+    this.ethereumManager = new EthereumManager(provider, options)
   }
 
   get account(): string {
@@ -101,7 +101,13 @@ export class Mchplus {
 
   async post(address: string, data = {}, netId: number = 1) {
     const encoded = encodeURIComponent(JSON.stringify(data))
-    const metadata = window.btoa(unescape(encoded))
+    let metadata
+    if (typeof window !== 'undefined') {
+      metadata = window.btoa(unescape(encoded))
+    } else {
+      const btoa = require('btoa')
+      metadata = btoa(unescape(encoded))
+    }
     const iss = await this.ethereumManager.getCurrentAccountAsync()
     const sig = await this.ethereumManager.getSignatureAsync(metadata)
     const postData = humps.decamelizeKeys({ iss, sig, metadata })
