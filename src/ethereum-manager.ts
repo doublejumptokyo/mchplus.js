@@ -7,6 +7,8 @@ export interface Options {
 export class EthereumManager {
   private web3: Web3
 
+  defaultAccount: string
+
   constructor(
     private provider = null,
     private options: Options = { dev: false }
@@ -25,13 +27,6 @@ export class EthereumManager {
         console.info('[mchplus.js] Initialize with `window.web3` .')
     }
     this.web3 = new Web3(this.provider)
-  }
-
-  get defaultAccount() {
-    if (this.provider === null) {
-      return ''
-    }
-    return this.provider.selectedAddress
   }
 
   get utils() {
@@ -54,6 +49,7 @@ export class EthereumManager {
     if (this.provider.enable) {
       try {
         await this.provider.enable()
+        this.defaultAccount = await this.getCurrentAccountAsync()
         if (this.provider.on) {
           this.provider.on('accountsChanged', () => {
             this.options.dev && console.info('[mchplus.js] Account Changed.')
@@ -78,6 +74,7 @@ export class EthereumManager {
         return
       }
     } else {
+      this.defaultAccount = await this.getCurrentAccountAsync()
       typeof window !== 'undefined' &&
         setInterval(async () => {
           const account = await this.getCurrentAccountAsync()
