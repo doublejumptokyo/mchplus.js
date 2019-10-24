@@ -54,14 +54,25 @@ export class EthereumManager {
     if (this.provider.enable) {
       try {
         await this.provider.enable()
-        this.provider.on('accountsChanged', () => {
-          this.options.dev && console.info('[mchplus.js] Account Changed.')
-          typeof window !== 'undefined' && location.reload()
-        })
-        this.provider.on('networkChanged', () => {
-          this.options.dev && console.info('[mchplus.js] Network Changed.')
-          typeof window !== 'undefined' && location.reload()
-        })
+        if (this.provider.on) {
+          this.provider.on('accountsChanged', () => {
+            this.options.dev && console.info('[mchplus.js] Account Changed.')
+            typeof window !== 'undefined' && location.reload()
+          })
+          this.provider.on('networkChanged', () => {
+            this.options.dev && console.info('[mchplus.js] Network Changed.')
+            typeof window !== 'undefined' && location.reload()
+          })
+        } else {
+          typeof window !== 'undefined' &&
+            setInterval(async () => {
+              const account = await this.getCurrentAccountAsync()
+              if (account !== this.defaultAccount) {
+                this.options.dev && console.info('[mchplus.js] Account Changed.')
+                typeof window !== 'undefined' && location.reload()
+              }
+            }, 100)
+        }
       } catch (e) {
         console.error(e)
         return
