@@ -1,6 +1,6 @@
 {
   "name": "mchplus.js",
-  "version": "0.0.17",
+  "version": "0.0.20",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "@types/web3": "^1.0.19",
     "axios": "^0.19.0",
     "base64url": "^3.0.1",
+    "btoa": "^1.2.1",
     "humps": "^2.0.1",
     "web3": "^1.2.1"
   },

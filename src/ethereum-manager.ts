@@ -7,40 +7,26 @@ export interface Options {
 export class EthereumManager {
   private web3: Web3
 
-  constructor(private options: Options = { dev: false }) {
-    if (typeof window === 'undefined') {
+  defaultAccount: string
+
+  constructor(
+    private provider = null,
+    private options: Options = { dev: false }
+  ) {
+    if (this.provider === null) {
       this.web3 = new Web3()
       return
     }
 
-    const w: any = window
-    if (w.ethereum) {
+    if (this.provider.autoRefreshOnNetworkChange !== undefined) {
       this.options.dev &&
         console.info('[mchplus.js] Initialize with `window.ethereum` .')
-      w.ethereum.autoRefreshOnNetworkChange = false
-      this.web3 = new Web3(w.ethereum)
-    } else if (w.web3) {
+      this.provider.autoRefreshOnNetworkChange = false
+    } else {
       this.options.dev &&
         console.info('[mchplus.js] Initialize with `window.web3` .')
-      this.web3 = new Web3(w.web3.currentProvider)
-    } else {
-      this.web3 = new Web3()
     }
-  }
-
-  get defaultAccount() {
-    if (typeof window === 'undefined') {
-      return ''
-    }
-
-    const w: any = window
-    if (w.ethereum) {
-      return w.ethereum.selectedAddress
-    } else if (w.web3) {
-      return w.web3.currentProvider.selectedAddress
-    } else {
-      return ''
-    }
+    this.web3 = new Web3(this.provider)
   }
 
   get utils() {
@@ -52,11 +38,7 @@ export class EthereumManager {
   }
 
   get hasWallet() {
-    if (typeof window === 'undefined') {
-      return false
-    }
-    const w: any = window
-    return typeof w.ethereum !== 'undefined' || typeof w.web3 !== 'undefined'
+    return this.provider !== null
   }
 
   async init() {
@@ -64,30 +46,43 @@ export class EthereumManager {
       throw new Error('[Error] There is no Ethereum wallet.')
     }
 
-    const w: any = window
-    if (w.ethereum) {
+    if (this.provider.enable) {
       try {
-        await w.ethereum.enable()
-        w.ethereum.on('accountsChanged', () => {
-          this.options.dev && console.info('[mchplus.js] Account Changed.')
-          w.location.reload()
-        })
-        w.ethereum.on('networkChanged', () => {
-          this.options.dev && console.info('[mchplus.js] Network Changed.')
-          w.location.reload()
-        })
+        await this.provider.enable()
+        this.defaultAccount = await this.getCurrentAccountAsync()
+        if (this.provider.on) {
+          this.provider.on('accountsChanged', () => {
+            this.options.dev && console.info('[mchplus.js] Account Changed.')
+            typeof window !== 'undefined' && location.reload()
+          })
+          this.provider.on('networkChanged', () => {
+            this.options.dev && console.info('[mchplus.js] Network Changed.')
+            typeof window !== 'undefined' && location.reload()
+          })
+        } else {
+          typeof window !== 'undefined' &&
+            setInterval(async () => {
+              const account = await this.getCurrentAccountAsync()
+              if (account !== this.defaultAccount) {
+                this.options.dev && console.info('[mchplus.js] Account Changed.')
+                typeof window !== 'undefined' && location.reload()
+              }
+            }, 100)
+        }
       } catch (e) {
         console.error(e)
         return
       }
     } else {
-      w.setInterval(async () => {
-        const account = await this.getCurrentAccountAsync()
-        if (account !== this.defaultAccount) {
-          this.options.dev && console.info('[mchplus.js] Account Changed.')
-          w.location.reload()
-        }
-      }, 100)
+      this.defaultAccount = await this.getCurrentAccountAsync()
+      typeof window !== 'undefined' &&
+        setInterval(async () => {
+          const account = await this.getCurrentAccountAsync()
+          if (account !== this.defaultAccount) {
+            this.options.dev && console.info('[mchplus.js] Account Changed.')
+            typeof window !== 'undefined' && location.reload()
+          }
+        }, 100)
     }
 
     this.options.dev && console.info('[mchplus.js] Unlocked.')
